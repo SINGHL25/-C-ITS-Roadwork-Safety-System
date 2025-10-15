@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C-ITS Roadwork Safety System - Complete Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .tab-navigation {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: #667eea;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .tab-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .tab-btn.active {
+            background: #764ba2;
+            box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            background: #667eea;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .simulation-canvas {
+            width: 100%;
+            height: 600px;
+            background: linear-gradient(180deg, #87CEEB 0%, #98D8C8 100%);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .road {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 200px;
+            background: #404040;
+            border-top: 4px solid #FFD700;
+        }
+
+        .road-line {
+            position: absolute;
+            height: 4px;
+            background: white;
+            top: 50%;
+            width: 80px;
+            animation: roadMove 2s linear infinite;
+        }
+
+        @keyframes roadMove {
+            from { left: 100%; }
+            to { left: -80px; }
+        }
+
+        .vehicle {
+            position: absolute;
+            width: 60px;
+            height: 100px;
+            background: #3b82f6;
+            border-radius: 10px 10px 5px 5px;
+            bottom: 50px;
+            transition: all 0.5s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .vehicle::before {
+            content: '🚗';
+            position: absolute;
+            font-size: 50px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .rsu {
+            position: absolute;
+            width: 40px;
+            height: 80px;
+            background: #f59e0b;
+            border-radius: 5px;
+            bottom: 200px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .rsu::before {
+            content: '📡';
+            position: absolute;
+            font-size: 30px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .roadwork {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            bottom: 200px;
+            background: #fbbf24;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .signal-wave {
+            position: absolute;
+            border: 3px solid #f59e0b;
+            border-radius: 50%;
+            animation: signalPulse 2s ease-out infinite;
+        }
+
+        @keyframes signalPulse {
+            0% {
+                width: 40px;
+                height: 40px;
+                opacity: 1;
+            }
+            100% {
+                width: 300px;
+                height: 300px;
+                opacity: 0;
+            }
+        }
+
+        .alert-popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(239, 68, 68, 0.95);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s;
+            z-index: 100;
+            min-width: 300px;
+        }
+
+        .alert-popup.show {
+            transform: translate(-50%, -50%) scale(1);
+            animation: alertBlink 1s ease-in-out infinite;
+        }
+
+        @keyframes alertBlink {
+            0%, 100% { background: rgba(239, 68, 68, 0.95); }
+            50% { background: rgba(220, 38, 38, 0.95); }
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .architecture-diagram {
+            width: 100%;
+            height: 600px;
+            background: white;
+            border-radius: 15px;
+            position: relative;
+            border: 2px solid #e0e0e0;
+        }
+
+        .arch-component {
+            position: absolute;
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s;
+        }
+
+        .arch-component:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .arch-arrow {
+            position: absolute;
+            background: #764ba2;
+            height: 3px;
+            transform-origin: left center;
+        }
+
+        .knowledge-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .knowledge-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .knowledge-item h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .log-container {
+            background: #1e293b;
+            color: #10b981;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 0.9em;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 5px;
+            border-left: 3px solid #10b981;
+            padding-left: 10px;
+        }
+
+        .log-entry.warning {
+            border-left-color: #f59e0b;
+            color: #f59e0b;
+        }
+
+        .log-entry.error {
+            border-left-color: #ef4444;
+            color: #ef4444;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.5s;
+        }
+
+        .alert-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .simulation-canvas {
+                height: 400px;
+            }
+            
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚦 C-ITS Roadwork Safety System</h1>
+            <p class="subtitle">Cooperative Intelligent Transport Systems - Complete End-to-End Solution</p>
+            <div class="tab-navigation">
+                <button class="tab-btn active" onclick="switchTab('architecture')">🏗️ Architecture</button>
+                <button class="tab-btn" onclick="switchTab('simulation')">🎮 Live Simulation</button>
+                <button class="tab-btn" onclick="switchTab('knowledge')">📚 AI Knowledge Base</button>
+                <button class="tab-btn" onclick="switchTab('events')">⚡ Event Publisher</button>
+                <button class="tab-btn" onclick="switchTab('monitoring')">📊 Monitoring</button>
+            </div>
+        </header>
+
+        <!-- Architecture Tab -->
+        <div id="architecture" class="tab-content active">
+            <div class="panel">
+                <h2>🏗️ System Architecture</h2>
+                <p style="margin-bottom: 20px; color: #666;">End-to-end C-ITS architecture with V2X communication, real-time processing, and AI-powered knowledge retrieval.</p>
+                
+                <div class="architecture-diagram" id="archDiagram">
+                    <!-- Components will be positioned absolutely -->
+                </div>
+
+                <div class="stats-grid" style="margin-top: 30px;">
+                    <div class="stat-card">
+                        <div class="stat-label">Active RSUs</div>
+                        <div class="stat-value" id="rsuCount">3</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Connected Vehicles</div>
+                        <div class="stat-value" id="vehicleCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Messages/sec</div>
+                        <div class="stat-value" id="messageRate">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Avg Latency</div>
+                        <div class="stat-value" id="avgLatency">45ms</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>🔧 Technology Stack</h2>
+                <div class="grid-2">
+                    <div>
+                        <h3 style="color: #667eea; margin-bottom: 15px;">Communication Protocols</h3>
+                        <div class="knowledge-item">
+                            <span class="badge badge-info">ETSI ITS-G5</span>
+                            <span class="badge badge-info">C-V2X</span>
+                            <p style="margin-top: 10px;">European standard for V2X communication operating at 5.9 GHz frequency band.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="color: #667eea; margin-bottom: 15px;">Message Types</h3>
+                        <div class="knowledge-item">
+                            <span class="badge badge-success">CAM</span>
+                            <span class="badge badge-warning">DENM</span>
+                            <span class="badge badge-info">SPATEM</span>
+                            <p style="margin-top: 10px;">Cooperative Awareness, Decentralized Environmental Notification, and Signal Phase messages.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulation Tab -->
+        <div id="simulation" class="tab-content">
+            <div class="panel">
+                <h2>🎮 Live V2X Simulation</h2>
+                <p style="margin-bottom: 20px; color: #666;">Interactive simulation demonstrating real-time roadwork warnings via V2X communication.</p>
+                
+                <div class="simulation-canvas" id="simCanvas">
+                    <div class="road" id="roadElement">
+                        <!-- Road lines will be generated dynamically -->
+                    </div>
+                    <div class="alert-popup" id="alertPopup">
+                        <div class="alert-icon">⚠️</div>
+                        <div id="alertText">ROADWORK AHEAD<br>Reduce Speed</div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-success" onclick="startSimulation()">▶️ Start Simulation</button>
+                    <button class="btn btn-danger" onclick="stopSimulation()">⏹️ Stop Simulation</button>
+                    <button class="btn" onclick="addVehicle()">🚗 Add Vehicle</button>
+                    <button class="btn" onclick="triggerRoadwork()">🚧 Trigger Roadwork Event</button>
+                    <button class="btn" onclick="resetSimulation()">🔄 Reset</button>
+                </div>
+
+                <div class="stats-grid" style="margin-top: 20px;">
+                    <div class="stat-card">
+                        <div class="stat-label">Vehicles in Zone</div>
+                        <div class="stat-value" id="simVehicleCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Alerts Sent</div>
+                        <div class="stat-value" id="alertsSent">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Alert Success Rate</div>
+                        <div class="stat-value" id="successRate">100%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Warning Distance</div>
+                        <div class="stat-value" id="warningDistance">500m</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>📋 Simulation Log</h2>
+                <div class="log-container scrollbar-custom" id="simLog">
+                    <div class="log-entry">[00:00:00] System initialized successfully</div>
+                    <div class="log-entry">[00:00:01] RSU network online - 3 units active</div>
+                    <div class="log-entry">[00:00:02] Waiting for simulation start...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Knowledge Base Tab -->
+        <div id="knowledge" class="tab-content">
+            <div class="panel">
+                <h2>📚 AI-Powered Knowledge Base</h2>
+                <p style="margin-bottom: 20px; color: #666;">Retrieval-Augmented Generation (RAG) system for C-ITS standards, protocols, and best practices.</p>
+                
+                <div class="search-container">
+                    <input type="text" class="search-input" id="knowledgeSearch" placeholder="Ask about C-ITS standards, V2X protocols, safety regulations..." onkeypress="if(event.key==='Enter') searchKnowledge()">
+                    <button class="btn" onclick="searchKnowledge()">🔍 Search</button>
+                </div>
+
+                <div id="searchResults"></div>
+
+                <div style="margin-top: 30px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">📖 Quick Reference Topics</h3>
+                    <div class="controls">
+                        <button class="btn" onclick="quickSearch('ETSI ITS-G5')">ETSI ITS-G5</button>
+                        <button class="btn" onclick="quickSearch('DENM messages')">DENM Messages</button>
+                        <button class="btn" onclick="quickSearch('roadwork safety')">Roadwork Safety</button>
+                        <button class="btn" onclick="quickSearch('V2X latency')">V2X Latency</button>
+                        <button class="btn" onclick="quickSearch('C-V2X vs ITS-G5')">C-V2X vs ITS-G5</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>📊 Knowledge Base Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Documents Indexed</div>
+                        <div class="stat-value">247</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Standards Covered</div>
+                        <div class="stat-value">18</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Query Response Time</div>
+                        <div class="stat-value">1.2s</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Accuracy Score</div>
+                        <div class="stat-value">94%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Publisher Tab -->
+        <div id="events" class="tab-content">
+            <div class="panel">
+                <h2>⚡ Roadwork Event Publisher</h2>
+                <p style="margin-bottom: 20px; color: #666;">Create and publish roadwork events to the C-ITS network.</p>
+                
+                <div class="grid-2">
+                    <div>
+                        <div class="input-group">
+                            <label>Event Type</label>
+                            <select id="eventType">
+                                <option value="roadwork">Roadwork</option>
+                                <option value="accident">Accident</option>
+                                <option value="hazard">Road Hazard</option>
+                                <option value="congestion">Traffic Congestion</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Location (km)</label>
+                            <input type="number" id="eventLocation" value="5.2" step="0.1">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Severity</label>
+                            <select id="eventSeverity">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Duration (minutes)</label>
+                            <input type="number" id="eventDuration" value="120" min="5">
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="input-group">
+                            <label>Warning Distance (meters)</label>
+                            <input type="number" id="warningDist" value="500" min="100" step="50">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Speed Limit (km/h)</label>
+                            <input type="number" id="speedLimit" value="60" min="20" step="10">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Description</label>
+                            <textarea id="eventDescription" rows="4" placeholder="Describe the roadwork event...">Road resurfacing on Highway A1. Right lane closed. Reduce speed to 60 km/h.</textarea>
+                        </div>
+
+                        <button class="btn btn-success" onclick="publishEvent()" style="width: 100%; margin-top: 10px;">📡 Publish Event</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>📜 Published Events</h2>
+                <div id="eventList">
+                    <div class="knowledge-item">
+                        <h3>No events published yet</h3>
+                        <p>Create and publish your first roadwork event using the form above.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monitoring Tab -->
+        <div id="monitoring" class="tab-content">
+            <div class="panel">
+                <h2>📊 System Monitoring Dashboard</h2>
+                <p style="margin-bottom: 20px; color: #666;">Real-time monitoring of C-ITS network performance and message flow.</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">System Uptime</div>
+                        <div class="stat-value" id="uptime">00:00:00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Messages</div>
+                        <div class="stat-value" id="totalMessages">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">CAM Messages</div>
+                        <div class="stat-value" id="camMessages">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">DENM Messages</div>
+                        <div class="stat-value" id="denmMessages">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>📡 Message Flow Monitor</h2>
+                <div class="log-container scrollbar-custom" id="messageLog">
+                    <div class="log-entry">[SYSTEM] Monitoring service started</div>
+                    <div class="log-entry">[INFO] Listening for V2X messages on all channels</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="panel">
+                    <h2>🎯 Performance Metrics</h2>
+                    <div class="knowledge-item">
+                        <h3>Message Delivery Success</h3>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="deliveryProgress" style="width: 98%"></div>
+                        </div>
+                        <p style="margin-top: 10px; color: #666;">98.5% of messages delivered successfully</p>
+                    </div>
+                    <div class="knowledge-item">
+                        <h3>Network Latency</h3>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 35%; background: linear-gradient(90deg, #10b981, #059669)"></div>
+                        </div>
+                        <p style="margin-top: 10px; color: #666;">Average: 45ms (Target: <130ms)</p>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2>⚙️ System Health</h2>
+                    <div class="knowledge-item">
+                        <h3><span class="badge badge-success">✓</span> RSU Network</h3>
+                        <p>All roadside units operational and communicating</p>
+                    </div>
+                    <div class="knowledge-item">
+                        <h3><span class="badge badge-success">✓</span> Message Broker</h3>
+                        <p>MQTT broker processing messages at optimal throughput</p>
+                    </div>
+                    <div class="knowledge-item">
+                        <h3><span class="badge badge-success">✓</span> AI Knowledge Base</h3>
+                        <p>RAG system responsive and ready for queries</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global State Management
+        const state = {
+            simulation: {
+                running: false,
+                vehicles: [],
+                rsu: null,
+                roadwork: null,
+                alertsSent: 0,
+                startTime: null
+            },
+            monitoring: {
+                uptime: 0,
+                totalMessages: 0,
+                camMessages: 0,
+                denmMessages: 0,
+                startTime: Date.now()
+            },
+            events: []
+        };
+
+        // Tab Switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'architecture') {
+                drawArchitecture();
+            }
+        }
+
+        // Architecture Diagram
+        function drawArchitecture() {
+            const diagram = document.getElementById('archDiagram');
+            diagram.innerHTML = `
+                <!-- Transport Agency -->
+                <div class="arch-component" style="top: 30px; left: 50px; width: 150px; background: #ef4444;">
+                    📋<br>Transport<br>Agency API
+                </div>
+
+                <!-- Event Publisher -->
+                <div class="arch-component" style="top: 30px; left: 250px; width: 150px; background: #f59e0b;">
+                    ⚡<br>Event<br>Publisher
+                </div>
+
+                <!-- Message Broker -->
+                <div class="arch-component" style="top: 150px; left: 150px; width: 150px; background: #8b5cf6;">
+                    🔄<br>Message<br>Broker<br>(MQTT)
+                </div>
+
+                <!-- RSU -->
+                <div class="arch-component" style="top: 270px; left: 50px; width: 120px; background: #f59e0b;">
+                    📡<br>RSU<br>Network
+                </div>
+
+                <!-- V2X Handler -->
+                <div class="arch-component" style="top: 270px; left: 220px; width: 120px; background: #06b6d4;">
+                    📨<br>V2X<br>Handler
+                </div>
+
+                <!-- Vehicle OBU -->
+                <div class="arch-component" style="top: 270px; left: 390px; width: 120px; background: #3b82f6;">
+                    🚗<br>Vehicle<br>OBU
+                </div>
+
+                <!-- AI Knowledge Base -->
+                <div class="arch-component" style="top: 30px; left: 450px; width: 150px; background: #10b981;">
+                    🧠<br>AI Knowledge<br>Base (RAG)
+                </div>
+
+                <!-- Alert System -->
+                <div class="arch-component" style="top: 150px; left: 450px; width: 150px; background: #ec4899;">
+                    ⚠️<br>Alert<br>Generation
+                </div>
+
+                <!-- Driver Interface -->
+                <div class="arch-component" style="top: 390px; left: 220px; width: 280px; background: #667eea;">
+                    🖥️<br>Driver Dashboard & Alert UI
+                </div>
+
+                <!-- Data Flow Arrows -->
+                <div style="position: absolute; top: 85px; left: 125px; width: 2px; height: 60px; background: #764ba2;"></div>
+                <div style="position: absolute; top: 85px; left: 325px; width: 2px; height: 60px; background: #764ba2;"></div>
+                <div style="position: absolute; top: 180px; left: 225px; width: 2px; height: 85px; background: #764ba2;"></div>
+                <div style="position: absolute; top: 325px; left: 280px; width: 2px; height: 60px; background: #764ba2;"></div>
+
+                <!-- Horizontal arrows -->
+                <div style="position: absolute; top: 60px; left: 200px; width: 50px; height: 2px; background: #764ba2;"></div>
+                <div style="position: absolute; top: 300px; left: 170px; width: 50px; height: 2px; background: #764ba2;"></div>
+                <div style="position: absolute; top: 300px; left: 340px; width: 50px; height: 2px; background: #764ba2;"></div>
+                <div style="position: absolute; top: 105px; left: 400px; width: 50px; height: 2px; background: #764ba2;"></div>
+                <div style="position: absolute; top: 180px; left: 300px; width: 150px; height: 2px; background: #764ba2;"></div>
+            `;
+
+            // Add animation to arrows
+            const arrows = diagram.querySelectorAll('div[style*="background: #764ba2"]');
+            arrows.forEach((arrow, i) => {
+                setTimeout(() => {
+                    arrow.style.opacity = '0';
+                    arrow.style.transition = 'opacity 0.5s';
+                    setInterval(() => {
+                        arrow.style.opacity = arrow.style.opacity === '0' ? '1' : '0';
+                    }, 1000);
+                }, i * 100);
+            });
+        }
+
+        // Initialize Architecture on Load
+        setTimeout(drawArchitecture, 100);
+
+        // Simulation Functions
+        function startSimulation() {
+            if (state.simulation.running) return;
+            
+            state.simulation.running = true;
+            state.simulation.startTime = Date.now();
+            addLog('simLog', '[SYSTEM] Simulation started', 'success');
+            addLog('simLog', '[RSU] Broadcasting DENM messages at 10 Hz');
+            
+            // Generate road lines
+            generateRoadLines();
+            
+            // Create RSU
+            createRSU();
+            
+            // Create roadwork zone
+            createRoadwork();
+            
+            // Add initial vehicle
+            addVehicle();
+            
+            // Start message simulation
+            startMessageSimulation();
+        }
+
+        function stopSimulation() {
+            state.simulation.running = false;
+            addLog('simLog', '[SYSTEM] Simulation stopped', 'warning');
+        }
+
+        function resetSimulation() {
+            state.simulation.running = false;
+            state.simulation.vehicles = [];
+            state.simulation.alertsSent = 0;
+            
+            const canvas = document.getElementById('simCanvas');
+            const vehicles = canvas.querySelectorAll('.vehicle');
+            const rsu = canvas.querySelector('.rsu');
+            const roadwork = canvas.querySelector('.roadwork');
+            const signals = canvas.querySelectorAll('.signal-wave');
+            
+            vehicles.forEach(v => v.remove());
+            if (rsu) rsu.remove();
+            if (roadwork) roadwork.remove();
+            signals.forEach(s => s.remove());
+            
+            document.getElementById('alertPopup').classList.remove('show');
+            document.getElementById('simVehicleCount').textContent = '0';
+            document.getElementById('alertsSent').textContent = '0';
+            
+            addLog('simLog', '[SYSTEM] Simulation reset', 'warning');
+        }
+
+        function generateRoadLines() {
+            const road = document.getElementById('roadElement');
+            for (let i = 0; i < 15; i++) {
+                const line = document.createElement('div');
+                line.className = 'road-line';
+                line.style.left = `${i * 100}px`;
+                line.style.animationDelay = `${i * 0.1}s`;
+                road.appendChild(line);
+            }
+        }
+
+        function createRSU() {
+            const canvas = document.getElementById('simCanvas');
+            const rsu = document.createElement('div');
+            rsu.className = 'rsu';
+            rsu.style.left = '60%';
+            canvas.appendChild(rsu);
+            state.simulation.rsu = rsu;
+
+            // Create signal waves
+            setInterval(() => {
+                if (!state.simulation.running) return;
+                createSignalWave(rsu);
+            }, 2000);
+        }
+
+        function createSignalWave(source) {
+            const wave = document.createElement('div');
+            wave.className = 'signal-wave';
+            const rect = source.getBoundingClientRect();
+            const canvasRect = document.getElementById('simCanvas').getBoundingClientRect();
+            wave.style.left = (rect.left - canvasRect.left + rect.width/2 - 20) + 'px';
+            wave.style.bottom = (canvasRect.bottom - rect.bottom + rect.height/2 - 20) + 'px';
+            document.getElementById('simCanvas').appendChild(wave);
+            
+            setTimeout(() => wave.remove(), 2000);
+        }
+
+        function createRoadwork() {
+            const canvas = document.getElementById('simCanvas');
+            const roadwork = document.createElement('div');
+            roadwork.className = 'roadwork';
+            roadwork.innerHTML = '🚧';
+            roadwork.style.right = '10%';
+            canvas.appendChild(roadwork);
+            state.simulation.roadwork = roadwork;
+        }
+
+        function addVehicle() {
+            const canvas = document.getElementById('simCanvas');
+            const vehicle = document.createElement('div');
+            vehicle.className = 'vehicle';
+            vehicle.style.left = '5%';
+            
+            const vehicleData = {
+                element: vehicle,
+                position: 5,
+                speed: 2 + Math.random(),
+                alerted: false
+            };
+            
+            state.simulation.vehicles.push(vehicleData);
+            canvas.appendChild(vehicle);
+            
+            document.getElementById('simVehicleCount').textContent = state.simulation.vehicles.length;
+            document.getElementById('vehicleCount').textContent = state.simulation.vehicles.length;
+            
+            addLog('simLog', `[VEHICLE] New vehicle entered simulation (ID: V${state.simulation.vehicles.length})`);
+            
+            animateVehicle(vehicleData);
+        }
+
+        function animateVehicle(vehicleData) {
+            const interval = setInterval(() => {
+                if (!state.simulation.running) {
+                    clearInterval(interval);
+                    return;
+                }
+
+                vehicleData.position += vehicleData.speed * 0.1;
+                vehicleData.element.style.left = vehicleData.position + '%';
+
+                // Check if vehicle is in warning zone (50-70% of canvas)
+                if (vehicleData.position > 50 && vehicleData.position < 70 && !vehicleData.alerted) {
+                    triggerAlert(vehicleData);
+                }
+
+                // Remove vehicle if it goes off screen
+                if (vehicleData.position > 100) {
+                    vehicleData.element.remove();
+                    const index = state.simulation.vehicles.indexOf(vehicleData);
+                    if (index > -1) {
+                        state.simulation.vehicles.splice(index, 1);
+                    }
+                    document.getElementById('simVehicleCount').textContent = state.simulation.vehicles.length;
+                    document.getElementById('vehicleCount').textContent = state.simulation.vehicles.length;
+                    clearInterval(interval);
+                }
+            }, 50);
+        }
+
+        function triggerAlert(vehicleData) {
+            vehicleData.alerted = true;
+            state.simulation.alertsSent++;
+            
+            const alertPopup = document.getElementById('alertPopup');
+            alertPopup.classList.add('show');
+            
+            document.getElementById('alertsSent').textContent = state.simulation.alertsSent;
+            
+            addLog('simLog', `[ALERT] Warning sent to vehicle at ${vehicleData.position.toFixed(1)}% position`, 'warning');
+            addLog('messageLog', `[DENM] Roadwork warning transmitted | Severity: HIGH | Distance: 500m`);
+            
+            state.monitoring.denmMessages++;
+            document.getElementById('denmMessages').textContent = state.monitoring.denmMessages;
+            
+            playAlertSound();
+            
+            setTimeout(() => {
+                alertPopup.classList.remove('show');
+            }, 3000);
+        }
+
+        function triggerRoadwork() {
+            if (state.simulation.vehicles.length === 0) {
+                addLog('simLog', '[WARNING] No vehicles in simulation', 'warning');
+                return;
+            }
+            
+            const vehicle = state.simulation.vehicles[0];
+            if (!vehicle.alerted) {
+                triggerAlert(vehicle);
+            }
+        }
+
+        function playAlertSound() {
+            // Create audio context for alert sound
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        function startMessageSimulation() {
+            setInterval(() => {
+                if (!state.simulation.running) return;
+                
+                // Simulate CAM messages from vehicles
+                state.simulation.vehicles.forEach((v, i) => {
+                    if (Math.random() > 0.7) {
+                        state.monitoring.camMessages++;
+                        state.monitoring.totalMessages++;
+                    }
+                });
+                
+                document.getElementById('camMessages').textContent = state.monitoring.camMessages;
+                document.getElementById('totalMessages').textContent = state.monitoring.totalMessages;
+                document.getElementById('messageRate').textContent = Math.floor(Math.random() * 20 + 10);
+                
+            }, 1000);
+        }
+
+        // Knowledge Base Functions
+        const knowledgeBase = {
+            'ETSI ITS-G5': {
+                title: 'ETSI ITS-G5 Standard',
+                content: 'ETSI ITS-G5 is the European standard for vehicular communication based on IEEE 802.11p. It operates in the 5.9 GHz frequency band and enables direct vehicle-to-vehicle (V2V) and vehicle-to-infrastructure (V2I) communication without cellular networks.',
+                tags: ['V2X', 'Communication', 'Standard'],
+                details: 'Key features include: low latency (< 100ms), range up to 800m, broadcast capability, and no subscription required. Used extensively in EU C-ITS deployments.'
+            },
+            'DENM messages': {
+                title: 'Decentralized Environmental Notification Messages (DENM)',
+                content: 'DENM messages are used in C-ITS to alert road users about hazardous events such as roadwork, accidents, or adverse weather conditions. These messages contain event type, location, severity, and duration information.',
+                tags: ['Messages', 'Safety', 'V2X'],
+                details: 'DENM priority levels: Low (informational), Medium (caution), High (warning), Critical (emergency). Messages are transmitted at 1-10 Hz depending on severity and distributed via RSUs to all vehicles in range.'
+            },
+            'roadwork safety': {
+                title: 'Roadwork Zone Safety with C-ITS',
+                content: 'C-ITS significantly improves roadwork zone safety by providing advance warning to drivers. Studies show up to 40% reduction in speed-related incidents when V2X warnings are deployed.',
+                tags: ['Safety', 'Roadwork', 'Implementation'],
+                details: 'Best practices include: warning messages 500-1000m before zone, speed limit advisories, lane closure information, and real-time updates on work progress. Integration with variable message signs (VMS) enhances effectiveness.'
+            },
+            'V2X latency': {
+                title: 'V2X Communication Latency Requirements',
+                content: 'Safety-critical V2X applications require end-to-end latency below 100ms. For roadwork warnings, target latency is 50-100ms from event detection to driver notification.',
+                tags: ['Performance', 'Requirements', 'V2X'],
+                details: 'Latency breakdown: Event detection (10-20ms), Message processing (10-15ms), V2X transmission (20-30ms), OBU processing (10-20ms), UI display (10-20ms). ITS-G5 typically achieves 30-50ms, C-V2X 20-40ms.'
+            },
+            'C-V2X vs ITS-G5': {
+                title: 'Comparison: C-V2X vs ETSI ITS-G5',
+                content: 'C-V2X (Cellular V2X) and ITS-G5 are competing V2X technologies. ITS-G5 is based on Wi-Fi (IEEE 802.11p), while C-V2X uses cellular technology (3GPP). Both support direct communication without network infrastructure.',
+                tags: ['Comparison', 'Technology', 'V2X'],
+                details: 'ITS-G5: Mature, deployed in EU, no cellular dependency. C-V2X: Better range (1.5km vs 800m), higher reliability in congested areas, 5G integration path. Many regions support both technologies for interoperability.'
+            }
+        };
+
+        function searchKnowledge() {
+            const query = document.getElementById('knowledgeSearch').value.toLowerCase();
+            if (!query) return;
+
+            addLog('messageLog', `[SEARCH] Query: "${query}"`);
+
+            const results = Object.keys(knowledgeBase).filter(key => 
+                key.toLowerCase().includes(query) || 
+                knowledgeBase[key].content.toLowerCase().includes(query) ||
+                knowledgeBase[key].details.toLowerCase().includes(query)
+            );
+
+            displaySearchResults(results, query);
+        }
+
+        function quickSearch(query) {
+            document.getElementById('knowledgeSearch').value = query;
+            searchKnowledge();
+        }
+
+        function displaySearchResults(results, query) {
+            const container = document.getElementById('searchResults');
+            
+            if (results.length === 0) {
+                container.innerHTML = `
+                    <div class="knowledge-item">
+                        <h3>No results found</h3>
+                        <p>Try searching for: ETSI ITS-G5, DENM, CAM, roadwork safety, V2X protocols</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <h3 style="color: #667eea; margin: 20px 0;">Found ${results.length} result(s) for "${query}"</h3>
+                ${results.map(key => {
+                    const item = knowledgeBase[key];
+                    return `
+                        <div class="knowledge-item">
+                            <h3>${item.title}</h3>
+                            <div style="margin: 10px 0;">
+                                ${item.tags.map(tag => `<span class="badge badge-info">${tag}</span>`).join('')}
+                            </div>
+                            <p style="margin: 15px 0; line-height: 1.6;">${item.content}</p>
+                            <p style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #e0e0e0; color: #666; line-height: 1.6;">
+                                <strong>Details:</strong> ${item.details}
+                            </p>
+                        </div>
+                    `;
+                }).join('')}
+            `;
+
+            // Simulate AI processing time
+            document.getElementById('knowledgeSearch').disabled = true;
+            setTimeout(() => {
+                document.getElementById('knowledgeSearch').disabled = false;
+                addLog('messageLog', `[SEARCH] Retrieved ${results.length} documents in 1.2s`);
+            }, 1200);
+        }
+
+        // Event Publisher Functions
+        function publishEvent() {
+            const event = {
+                id: `EVT-${Date.now()}`,
+                type: document.getElementById('eventType').value,
+                location: document.getElementById('eventLocation').value,
+                severity: document.getElementById('eventSeverity').value,
+                duration: document.getElementById('eventDuration').value,
+                warningDistance: document.getElementById('warningDist').value,
+                speedLimit: document.getElementById('speedLimit').value,
+                description: document.getElementById('eventDescription').value,
+                timestamp: new Date().toISOString()
+            };
+
+            state.events.unshift(event);
+            displayEvents();
+            
+            addLog('simLog', `[EVENT] Published: ${event.type.toUpperCase()} at km ${event.location}`, 'success');
+            addLog('messageLog', `[PUBLISH] Event ${event.id} | Type: ${event.type} | Severity: ${event.severity}`);
+            
+            // Trigger alert if simulation is running
+            if (state.simulation.running && state.simulation.vehicles.length > 0) {
+                setTimeout(() => {
+                    state.simulation.vehicles.forEach(v => {
+                        if (!v.alerted && v.position > 40) {
+                            triggerAlert(v);
+                        }
+                    });
+                }, 500);
+            }
+        }
+
+        function displayEvents() {
+            const container = document.getElementById('eventList');
+            
+            if (state.events.length === 0) {
+                container.innerHTML = `
+                    <div class="knowledge-item">
+                        <h3>No events published yet</h3>
+                        <p>Create and publish your first roadwork event using the form above.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = state.events.map(event => {
+                const severityColors = {
+                    low: 'badge-info',
+                    medium: 'badge-warning',
+                    high: 'badge-warning',
+                    critical: 'badge-warning'
+                };
+
+                return `
+                    <div class="knowledge-item">
+                        <h3>
+                            ${event.type.toUpperCase()} - ${event.id}
+                            <span class="badge ${severityColors[event.severity]}">${event.severity.toUpperCase()}</span>
+                        </h3>
+                        <p style="margin: 10px 0;"><strong>Location:</strong> km ${event.location} | <strong>Duration:</strong> ${event.duration} min | <strong>Speed Limit:</strong> ${event.speedLimit} km/h</p>
+                        <p style="margin: 10px 0;"><strong>Warning Distance:</strong> ${event.warningDistance}m</p>
+                        <p style="margin: 10px 0; color: #666;">${event.description}</p>
+                        <p style="margin-top: 10px; font-size: 0.9em; color: #999;">Published: ${new Date(event.timestamp).toLocaleString()}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Monitoring Functions
+        function updateMonitoring() {
+            setInterval(() => {
+                const elapsed = Date.now() - state.monitoring.startTime;
+                const hours = Math.floor(elapsed / 3600000);
+                const minutes = Math.floor((elapsed % 3600000) / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                
+                document.getElementById('uptime').textContent = 
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                // Simulate random message activity
+                if (state.simulation.running) {
+                    const random = Math.floor(Math.random() * 3);
+                    if (random === 0) {
+                        addLog('messageLog', `[CAM] Vehicle position update received`);
+                    }
+                }
+
+                // Update delivery progress
+                const successRate = 98 + Math.random() * 1.5;
+                document.getElementById('deliveryProgress').style.width = successRate + '%';
+                document.getElementById('successRate').textContent = successRate.toFixed(1) + '%';
+
+                // Update latency
+                const latency = 40 + Math.floor(Math.random() * 15);
+                document.getElementById('avgLatency').textContent = latency + 'ms';
+                
+            }, 1000);
+        }
+
+        // Utility Functions
+        function addLog(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            
+            container.insertBefore(entry, container.firstChild);
+            
+            // Keep only last 50 entries
+            while (container.children.length > 50) {
+                container.removeChild(container.lastChild);
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            addLog('simLog', '[SYSTEM] C-ITS Roadwork Safety System initialized');
+            addLog('simLog', '[SYSTEM] All components operational');
+            addLog('messageLog', '[SYSTEM] Monitoring service online');
+            addLog('messageLog', '[INFO] Ready to process V2X messages');
+            
+            updateMonitoring();
+            
+            // Auto-add some demo knowledge searches
+            setTimeout(() => {
+                displayEvents();
+            }, 500);
+        });
+
+        // Add some demo activity
+        setInterval(() => {
+            if (state.simulation.running && Math.random() > 0.7) {
+                addLog('messageLog', `[CAM] Heartbeat from ${state.simulation.vehicles.length} vehicle(s)`);
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
